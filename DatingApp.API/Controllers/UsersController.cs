@@ -1,5 +1,8 @@
-﻿using DatingApp.API.Data;
+﻿using AutoMapper;
+using DatingApp.API.Data;
+using DatingApp.API.DTOs;
 using DatingApp.API.Entities;
+using DatingApp.API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,28 +14,38 @@ using System.Threading.Tasks;
 
 namespace DatingApp.API.Controllers
 {
+    [Authorize]
     public class UsersController : BaseAPIController
     {
-        private readonly DataContext _context;
+        private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
 
-        public UsersController(DataContext context)
+        public UsersController(IUserRepository userRepository, IMapper mapper)
         {
-            _context = context;
+            this._userRepository = userRepository;
+            this._mapper = mapper;
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<AppUser>>> Getusers()
+        public async Task<ActionResult<IEnumerable<MemberDto>>> Getusers()
         {
-            var users = _context.Users.ToListAsync();
-            return await users;
+            var users = await _userRepository.GetMembersAsync();
+            return Ok(users);
+
+            //var users = await _userRepository.GetUsersAsync();
+
+            //var usersToReturn = _mapper.Map<IEnumerable<MemberDto>>(users);
+            //return Ok(usersToReturn);
         }
 
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<ActionResult<AppUser>> Getuser(int id)
+        [HttpGet("{username}")]
+        public async Task<ActionResult<MemberDto>> Getuser(string username)
         {
-            return await _context.Users.FindAsync(id);            
+            return await _userRepository.GetMemberAsync(username);
+
+            //var user = await _userRepository.GetUserByUsernameAsync(username);
+
+            //return _mapper.Map<MemberDto>(user);           
         }
     }
 }
