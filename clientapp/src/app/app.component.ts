@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { User } from './_modals/user';
 import { AccountService } from './_services/account.service';
+import { PresenceService } from './_services/presence.service';
 
 @Component({
   selector: 'app-root',
@@ -13,9 +14,8 @@ export class AppComponent implements OnInit{
   users : any;
 
 
-  constructor(private accountservice: AccountService) {
-
-  }
+  constructor(private accountservice: AccountService, private presense: PresenceService) {}
+  
     ngOnInit() {
       //this.getUsers();  
       this.setCurrentUser();  
@@ -23,8 +23,12 @@ export class AppComponent implements OnInit{
 
   setCurrentUser(){
   const user:User = JSON.parse(localStorage.getItem('user'));
-  this.accountservice.setCurrentuser(user);
+  
+  if(user) {
+      this.accountservice.setCurrentuser(user);
+      this.presense.createHubConnection(user);
   }
+}
 
   /*getUsers()
   {

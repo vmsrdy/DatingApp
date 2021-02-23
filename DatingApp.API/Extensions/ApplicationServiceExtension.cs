@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DatingApp.API.Helpers;
+using DatingApp.API.SignalR;
 
 namespace DatingApp.API.Extensions
 {
@@ -17,6 +18,7 @@ namespace DatingApp.API.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
+            services.AddSingleton<PresenseTracker>();
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddScoped<IPhotoService, PhotoService>();
             services.AddScoped<LogUserActivity>();
