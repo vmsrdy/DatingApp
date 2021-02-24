@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Message } from '../_modals/message';
 import { Pagination } from '../_modals/pagination';
+import { ConfirmService } from '../_services/confirm.service';
 import { MessageService } from '../_services/message.service';
 
 @Component({
@@ -11,22 +12,22 @@ import { MessageService } from '../_services/message.service';
 })
 export class MessagesComponent implements OnInit {
 
-  messages: Message[] =[];
+  messages: Message[] = [];
   pagination: Pagination;
-  container: string= 'Unread';
+  container: string = 'Unread';
   pageNumber: Number = 1;
-  pageSize:Number = 5;
-  loading:boolean = false;
+  pageSize: Number = 5;
+  loading: boolean = false;
 
-  constructor(private messageService: MessageService) { }
+  constructor(private messageService: MessageService, private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.loadMessages();
   }
 
-  loadMessages(){
+  loadMessages() {
     this.loading = true;
-    this.messageService.getMessages(this.pageNumber, this.pageSize, this.container).subscribe(response=> {
+    this.messageService.getMessages(this.pageNumber, this.pageSize, this.container).subscribe(response => {
       this.messages = response.result;
       this.pagination = response.pagination;
       this.loading = false;
@@ -34,12 +35,17 @@ export class MessagesComponent implements OnInit {
   }
 
   deleteMessage(id: number) {
-    this.messageService.deleteMessage(id).subscribe(() =>{
-      this.messages.splice(this.messages.findIndex(m=>m.id == id),1);
+    this.confirmService.confirm('Confirm Delete Message', 'This can not be reverted').subscribe(result => {
+      if (result) {
+        this.messageService.deleteMessage(id).subscribe(() => {
+          this.messages.splice(this.messages.findIndex(m => m.id == id), 1);
+        })
+      }
     })
+
   }
 
-  pageChanged(event:any){
+  pageChanged(event: any) {
     this.pageNumber = event.page;
     this.loadMessages();
   }
